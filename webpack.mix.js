@@ -13,3 +13,6 @@ const mix = require('laravel-mix');
 
 mix.js('resources/js/app.js', 'public/js')
     .sass('resources/sass/app.scss', 'public/css');
+
+/*copy node module files to public node module folder*/
+mix.copyDirectory('node_modules', 'public/node_modules');
