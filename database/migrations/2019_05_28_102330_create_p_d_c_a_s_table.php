@@ -26,8 +26,8 @@ class CreatePDCASTable extends Migration
             $table->text('description')->nullable();
             $table->unsignedBigInteger('p_d_c_a_category_id')->index()->nullable();
             $table->unsignedBigInteger('status_id')->default(null)->nullable();
-            $table->dateTime('start_date')->useCurrent();//->nullable()
-            $table->dateTime('complete_date')->useCurrent();//->nullable()
+            $table->dateTime('start_date')->useCurrent()->nullable();
+            $table->dateTime('complete_date')->useCurrent()->nullable();
             $table->integer('piority')->default(0)->nullable();
             $table->text('resource_dir')->nullable()->default(null);
             //$table->softDeletes();
