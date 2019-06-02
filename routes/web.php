@@ -27,13 +27,35 @@ Route::get('home', array('uses' => function(){
     return view('home');
 }))->name('home.index');
 
+Route::get('storage/{filename}', function($filename){
+    //$path = explode('/', $filename);
+    //$path = storage_path($filename);
+    $filename = str_replace('/', DIRECTORY_SEPARATOR, $filename); 
+    if (!Storage::exists($filename)) {
+        abort(404);
+    }
+    $file = Storage::get($filename);
+    $type = Storage::mimeType($filename);
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+    return $response;
+})->where(['filename' => '.*']);
+
 Route::group(['middleware' => 'memberMiddleWare'], function(){
     Route::match(['get', 'post'], 'users/list', array('uses' => 'UserController@listUsers'))->name('user.list');
     Route::match(['get', 'post'], 'companies/list', array('uses' => 'CompanyController@listCompanies'))->name('company.list');
     Route::match(['get', 'post'], 'departments/list', array('uses' => 'DepartmentController@listDepartments'))->name('department.list');
+    Route::match(['get', 'post'], 'pdcas/list', array('uses' => 'PDCAController@listPDCAs'))->name('pDCA.list');
+    Route::match(['get', 'post'], 'user-attachments/list-file-input', array('uses' => 'UserAttachmentController@listUserAttachmentFileInput'))->name('userAttachment.listUserAttachmentFileInput');
     
     Route::get('pdcas/create', array('uses' => 'PDCAController@create'))->name('pDCA.create');
     Route::post('pdcas/create', array('uses' => 'PDCAController@store'))->name('pDCA.store');
+    Route::get('pdcas/show-created-pdcas', array('uses' => 'PDCAController@showCreatedPDCA'))->name('pDCA.showCreatedPDCA');
+    
+    Route::get('pdcas/{pDCA}/show', array('uses' => 'PDCAController@show'))->name('pDCA.show');
+    Route::get('pdcas/{pDCA}/destroy', array('uses' => 'PDCAController@destroy'))->name('pDCA.destroy');
+    Route::get('pdcas/{pDCA}/edit', array('uses' => 'PDCAController@edit'))->name('pDCA.edit');
+    Route::post('pdcas/{pDCA}/update', array('uses' => 'PDCAController@update'))->name('pDCA.update');
 });
 
 Route::group(['middleware' => 'superAdminMiddleware'], function(){

@@ -28,6 +28,11 @@ class PDCA extends Model
         return $this->hasMany('App\PDCACompanyDepartment', 'p_d_c_a_id', 'id');
     }
     
+    //one to many
+    public function pDCAUsers(){
+        return $this->hasMany('App\PDCAUser', 'p_d_c_a_id', 'id');
+    }
+    
     //one to many (inverse)
     public function status(){
         return $this->belongsTo('App\Status', 'status_id', 'id');

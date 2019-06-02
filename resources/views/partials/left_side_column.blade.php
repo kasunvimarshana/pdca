@@ -41,7 +41,7 @@
                 </a>
                 <ul class="treeview-menu">
                     <li class="{!! set_active(['pdcas/create', 'pdcas/create/*']) !!}"><a href="{!! route('pDCA.create') !!}"> <i class="fa fa-arrow-circle-o-right"></i> Create New</a></li>
-                    <li class="{!! set_active(['pdcas/show-created-pdcas', 'pdcas/show-created-pdcas/*']) !!}"><a href="{!! route('pDCA.create') !!}"> <i class="fa fa-arrow-circle-o-right"></i> Created PDCAS</a></li>
+                    <li class="{!! set_active(['pdcas/show-created-pdcas', 'pdcas/show-created-pdcas/*']) !!}"><a href="{!! route('pDCA.showCreatedPDCA') !!}"> <i class="fa fa-arrow-circle-o-right"></i> Created PDCAS</a></li>
                 </ul>
             </li>
             <li class="treeview {!! set_active(['team/departments', 'team/departments/*']) !!}">

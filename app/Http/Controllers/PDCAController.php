@@ -158,7 +158,7 @@ class PDCAController extends Controller
                         //$filename = $value->store( $pDCAResourceDir );
                         $filename = $value->storeAs( 
                             $pDCAResourceDir,
-                            $newPDCA->id . '_' . $file_original_name
+                            $newPDCA->id . '_' . uniqid( time() ) . '_' . $file_original_name
                         );
                         $newUserAttachment = $newPDCA->userAttachments()->create(array(
                             'is_visible' => true,
@@ -217,6 +217,9 @@ class PDCAController extends Controller
     public function show(PDCA $pDCA)
     {
         //
+        if(view()->exists('pdca_show')){
+            return View::make('pdca_show', array('pDCA' => $pDCA));
+        }
     }
 
     /**
@@ -228,6 +231,9 @@ class PDCAController extends Controller
     public function edit(PDCA $pDCA)
     {
         //
+        if(view()->exists('pdca_edit')){
+            return View::make('pdca_edit', array('pDCA' => $pDCA));
+        }
     }
 
     /**
@@ -251,5 +257,130 @@ class PDCAController extends Controller
     public function destroy(PDCA $pDCA)
     {
         //
+    }
+    
+    //
+    public function listPDCAs(Request $request){
+        // Solution to get around integer overflow errors
+        // $model->latest()->limit(PHP_INT_MAX)->offset(1)->get();
+        // function will process the ajax request
+        $draw = null;
+        $start = 0;
+        $length = 0;
+        $search = null;
+        
+        $recordsTotal = 0;
+        $recordsFiltered = 0;
+        $query = null;
+        $queryResult = null;
+        //$recordsTotal = Model::where('active','=','1')->count();
+        $date_today = Carbon::now()->format('Y-m-d');
+        
+        $draw = $request->get('draw');
+        
+        $pDCA = new PDCA();
+        
+        $query = $pDCA->with(['userAttachments','pDCACompanyDepartments','pDCAUsers','status','pDCACategory','companies','departments'])->where('is_visible', '=', true);
+        $recordsTotal = $query->count();
+        $recordsFiltered = $recordsTotal;
+            
+        // get search query value
+        if( ($request->get('search')) && (!empty($request->get('search'))) ){
+            $search = $request->get('search');
+            if( $search && (@key_exists('value', $search)) ){
+                $search = $search['value'];
+            }
+            if($search && (!empty($search))){
+                //$search = (string) $search;
+                $query = $query->where('title', 'like', '%' . $search . '%');
+            }
+        }
+        
+        // own user
+        if( ($request->get('own_user')) && (!empty($request->get('own_user'))) ){
+            $own_user =  $request->get('own_user');
+            $query = $query->whereHas('pDCAUsers', function($query) use ($own_user){
+                $query->where('own_user', '=', $own_user);
+            });
+        }
+        
+        // company
+        if( ($request->get('company_pk')) && (!empty($request->get('company_pk'))) ){
+            $company_pk =  $request->get('company_pk');
+            $query = $query->whereHas('pDCACompanyDepartments', function($query) use ($company_pk){
+                $query->where('company_pk', '=', $company_pk);
+            });
+        }
+        
+        // department
+        if( ($request->get('department_pk')) && (!empty($request->get('department_pk'))) ){
+            $department_pk =  $request->get('department_pk');
+            $query = $query->whereHas('pDCACompanyDepartments', function($query) use ($department_pk){
+                $query->where('department_pk', '=', $department_pk);
+            });
+        }
+        
+        // category
+        if( ($request->get('p_d_c_a_category_name')) && (!empty($request->get('p_d_c_a_category_name'))) ){
+            $p_d_c_a_category_name =  $request->get('p_d_c_a_category_name');
+            $query = $query->whereHas('pDCACategory', function($query) use ($p_d_c_a_category_name){
+                $query->where('name', '=', $p_d_c_a_category_name);
+            });
+        }
+        
+        // get filtered record count
+        $recordsFiltered = $query->count();
+        
+        // get limit value
+        if( $request->get('length') ){
+            $length = intval( $request->get('length') );
+            $query = $query->limit($length);
+        }
+        // set default value for length (PHP_INT_MAX)
+        if( $length <= 0 ){
+            $length = PHP_INT_MAX;
+            //$length = 0;
+        }
+        
+        // get offset value
+        if( $request->get('start') ){
+            $start = intval( $request->get('start') );
+        }else if( $request->get('page') ){
+            $start = intval( $request->get('page') );
+            //$start = abs( ( ( $start - 1 ) * $length ) );
+            $start = ( ( $start - 1 ) * $length );
+        }
+        
+        // filter with offset value
+        if( $start > 0 ){
+            //$query = $query->limit($length)->skip($start);
+            $query = $query->limit($length)->offset($start);
+        }
+        
+        // order
+        $query->orderBy('id', 'desc');
+        $query->orderBy('updated_at', 'desc');
+        
+        // get data
+        $queryResult = $query->get();
+        
+        $recordsTotal = $recordsFiltered;
+        $data = array(
+            'draw' => $draw,
+            'start' => $start,
+            'length' => $length,
+            'search' => $search,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $queryResult,
+        );
+        
+        return Response::json( $data );   
+    }
+    
+    public function showCreatedPDCA(Request $request){
+        if(view()->exists('pdca_created_show_all')){
+            return View::make('pdca_created_show_all');
+        }
     }
 }
