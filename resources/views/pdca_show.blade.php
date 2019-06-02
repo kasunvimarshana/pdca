@@ -205,6 +205,87 @@
     @includeIf('partials.company_select', array('optionSelectId' => 'company_pk'))
     @includeIf('partials.department_select', array('optionSelectId' => 'department_pk'))
     <script>
+        function getInitialPreview(){
+            "use strict";
+            
+            var returnData = Array();
+            
+            $.ajax({
+                async: false,
+                cache: false,
+                processData: false,
+                url: "{!! route('userAttachment.listUserAttachmentFileInput') !!}",
+                method: "GET",
+                data: {
+                    '_token': '{!! csrf_token() !!}'
+                },
+                xhrFields: {
+                    withCredentials: true
+                },
+                beforeSend: function( xhr ) {
+                    //xhr.overrideMimeType( "text/plain; charset=x-user-defined" );
+                }
+            })
+            .done(function(data) {
+                //console.log( "success" );
+                //console.log(data);
+                //var dataObj = $.parseJSON( data );
+                var dataObj = data;
+                returnData = dataObj.initialPreview;
+            })
+            .fail(function(data) {
+                //console.log( "error" );
+                //console.log(data);
+            })
+            .always(function(data) {
+                //console.log( "complete" );
+                //console.log(data);
+            });
+            
+            return returnData;
+        }
+        
+        function getInitialPreviewConfig(){
+            "use strict";
+            
+            var returnData = Array();
+            
+            $.ajax({
+                async: false,
+                cache: false,
+                processData: false,
+                url: "{!! route('userAttachment.listUserAttachmentFileInput') !!}",
+                method: "GET",
+                data: {
+                    '_token': '{!! csrf_token() !!}'
+                },
+                xhrFields: {
+                    withCredentials: true
+                },
+                beforeSend: function( xhr ) {
+                    //xhr.overrideMimeType( "text/plain; charset=x-user-defined" );
+                }
+            })
+            .done(function(data) {
+                //console.log( "success" );
+                //console.log(data);
+                //var dataObj = $.parseJSON( data );
+                var dataObj = data;
+                returnData = dataObj.initialPreviewConfig;
+            })
+            .fail(function(data) {
+                //console.log( "error" );
+                //console.log(data);
+            })
+            .always(function(data) {
+                //console.log( "complete" );
+                //console.log(data);
+            });
+            
+            return returnData;
+        }
+    </script>
+    <script>
     $(function() {
         "use strict";
         
@@ -214,90 +295,6 @@
         $("#title").prop("disabled", true);
         $("#description").prop("disabled", true);
         
-        /*$("#var_user_attachment").fileinput({
-            'showUpload': false,
-            'showRemove': false,
-            'previewFileType': 'any'
-        })
-        .fileinput("lock")
-        .fileinput("disable")
-        .fileinput("refresh", {showUpload: false});*/
-        
-        /////////////////////////////////////////////////////////////////////
-        function getInitialPreview(){
-            var returnData = Array();
-            
-            $.ajax({
-                async: false,
-                cache: false,
-                processData: false,
-                url: "{!! route('userAttachment.listUserAttachmentFileInput') !!}",
-                method: "GET",
-                data: {
-                    '_token': '{!! csrf_token() !!}'
-                },
-                xhrFields: {
-                    withCredentials: true
-                },
-                beforeSend: function( xhr ) {
-                    //xhr.overrideMimeType( "text/plain; charset=x-user-defined" );
-                }
-            })
-            .done(function(data) {
-                //console.log( "success" );
-                //console.log(data);
-            })
-            .fail(function(data) {
-                //console.log( "error" );
-                //console.log(data);
-            })
-            .always(function(data) {
-                //console.log( "complete" );
-                //console.log(data);
-                data = $.parseJSON( data );
-                returnData = data.initialPreview;
-            });
-            
-            return returnData;
-        }
-        
-        function initialPreviewConfig(){
-            var returnData = Array();
-            
-            $.ajax({
-                async: false,
-                cache: false,
-                processData: false,
-                url: "{!! route('userAttachment.listUserAttachmentFileInput') !!}",
-                method: "GET",
-                data: {
-                    '_token': '{!! csrf_token() !!}'
-                },
-                xhrFields: {
-                    withCredentials: true
-                },
-                beforeSend: function( xhr ) {
-                    //xhr.overrideMimeType( "text/plain; charset=x-user-defined" );
-                }
-            })
-            .done(function(data) {
-                //console.log( "success" );
-                //console.log(data);
-            })
-            .fail(function(data) {
-                //console.log( "error" );
-                //console.log(data);
-            })
-            .always(function(data) {
-                //console.log( "complete" );
-                //console.log(data);
-                data = $.parseJSON( data );
-                returnData = data.initialPreviewConfig;
-            });
-            
-            return returnData;
-        }
-        /////////////////////////////////////////////////////////////////////    
         $("#var_user_attachment").fileinput({
             'theme': "fa",
             'previewClass': "",
@@ -306,6 +303,7 @@
             'validateInitialCount': true,
             'initialPreviewAsData': true,
             'overwriteInitial': true,
+            'append': true,
             'required': false,
             'showUpload': false,
             'showRemove': false,
@@ -317,8 +315,20 @@
                     '_token': '{!! csrf_token() !!}'
                 };
             },
-            'initialPreview': [],
-            'initialPreviewConfig': []
+            'initialPreview': getInitialPreview(),
+            'initialPreviewConfig': getInitialPreviewConfig(),
+            'initialPreviewThumbTags': [],
+            layoutTemplates: {
+                main1: "{preview}\n" +
+                    "<div class=\'input-group {class}\'>\n" +
+                    "   <div class=\'input-group-btn\ input-group-prepend'>\n" +
+                    "       {browse}\n" +
+                    "       {upload}\n" +
+                    "       {remove}\n" +
+                    "   </div>\n" +
+                    "   {caption}\n" +
+                    "</div>"
+            }
         })
         .on("filebeforedelete", function() {
             return new Promise(function(resolve, reject) {
@@ -346,39 +356,8 @@
                 $.alert("File deletion was successful!");
             }, 900);
         })
-        .on('filesorted', function(e, params) {
-            console.log('file sorted', e, params);
-        }).on('fileuploaded', function(e, params) {
-            console.log('file uploaded', e, params);
-        })
-        .on('fileclear', function(event) {
-            console.log("fileclear");
-        })
-        .on('filecleared', function(event) {
-            console.log("filecleared");
-        })
-        .on('fileloaded', function(event, file, previewId, index, reader) {
-            console.log("fileloaded");
-        })
-        .on('filebrowse', function(event) {
-            console.log("File browse triggered.");
-        })
-        .on('filepreajax', function(event, previewId, index) {
-            console.log('File pre ajax triggered');
-        })
-        .on('fileuploaded', function(event, data, previewId, index) {
-            var form = data.form, files = data.files, extra = data.extra;
-            var response = data.response, reader = data.reader;
-            console.log('File uploaded triggered');
-        })
-        .on('filesorted', function(event, params) {
-            console.log('File sorted ', params.previewId, params.oldIndex, params.newIndex, params.stack);
-        })
-        .fileinput("clear")
-        //.fileinput("unlock")
-        //.fileinput("disable")
-        .fileinput("refresh", {showUpload: false})
-        .fileinput("upload");
+        .attr("readonly", "readonly");
+        //.fileinput("disable");
         
         $("#complete_date").datepicker({
             'autoclose': true,

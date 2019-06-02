@@ -193,12 +193,12 @@ class UserAttachmentController extends Controller
                     'size' => Storage::size($value->link_url),
                     //'type' => Storage::mimeType($value->link_url),
                     'fileId' => $value->id, // file identifier
-                    //'zoomData' => Storage::url($value->link_url),
+                    'zoomData' => Storage::url($value->link_url),
                     //'lastModified' => Storage::lastModified($value->link_url),
                     //'getVisibility' => Storage::getVisibility($value->link_url),
                     //'getMetaData' => Storage::getMetaData($value->link_url),
-                    'downloadUrl' => Storage::download($value->link_url, $value->file_original_name), // the url to download the file
-                    'url' => route('home', ['id' => 1]) // server api to delete the file based on key
+                    //'downloadUrl' => Storage::download($value->link_url, $value->file_original_name), // the url to download the file
+                    //'url' => route('home', ['id' => 1]) // server api to delete the file based on key
                 ));
             }
         }
