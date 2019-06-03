@@ -21,3 +21,22 @@ $knownDate = Carbon::create(2001, 5, 21, 12);  // create testing date
 Carbon::setTestNow($knownDate);                     // set the mock 
 echo Carbon::now();    
 ?>
+
+<script>
+    moment().startOf('year');
+    moment().startOf('year').format('MM/DD/YYYY');
+    
+    moment().startOf('year');    // set to January 1st, 12:00 am this year
+    moment().startOf('month');   // set to the first of this month, 12:00 am
+    moment().startOf('quarter');  // set to the beginning of the current quarter, 1st day of months, 12:00 am
+    moment().startOf('week');    // set to the first day of this week, 12:00 am
+    moment().startOf('isoWeek'); // set to the first day of this week according to ISO 8601, 12:00 am
+    moment().startOf('day');     // set to 12:00 am today
+    moment().startOf('date');     // set to 12:00 am today
+    moment().startOf('hour');    // set to now, but with 0 mins, 0 secs, and 0 ms
+    moment().startOf('minute');  // set to now, but with 0 seconds and 0 milliseconds
+    moment().startOf('second');  // same as moment().milliseconds(0);
+    
+    moment().startOf('year');
+    moment().month(0).date(1).hours(0).minutes(0).seconds(0).milliseconds(0);
+</script>
