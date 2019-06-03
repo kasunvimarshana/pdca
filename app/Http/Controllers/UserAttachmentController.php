@@ -93,6 +93,41 @@ class UserAttachmentController extends Controller
     public function destroy(UserAttachment $userAttachment)
     {
         //
+        $data = array('title' => '', 'text' => '', 'type' => '', 'timer' => 3000);
+        //Model::find(explode(',', $id))->delete();
+        // do process
+        // Start transaction!
+        DB::beginTransaction();
+
+        try {
+            
+            if(Storage::exists($userAttachment->link_url)){
+                Storage::delete( $userAttachment->link_url );
+            }
+            $userAttachment->delete();
+            
+        }catch(\Exception $e){
+            DB::rollback();
+            $data = array(
+                'title' => 'error',
+                'text' => 'error',
+                'type' => 'warning',
+                'timer' => 3000
+            );
+
+            return Response::json( $data );
+        }
+
+        DB::commit();
+
+        $data = array(
+            'title' => 'success',
+            'text' => 'success',
+            'type' => 'success',
+            'timer' => 3000
+        );
+
+        return Response::json( $data );
     }
     
     public function listUserAttachmentFileInput(Request $request){
@@ -198,7 +233,8 @@ class UserAttachmentController extends Controller
                     //'getVisibility' => Storage::getVisibility($value->link_url),
                     //'getMetaData' => Storage::getMetaData($value->link_url),
                     //'downloadUrl' => Storage::download($value->link_url, $value->file_original_name), // the url to download the file
-                    //'url' => route('home', ['id' => 1]) // server api to delete the file based on key
+                    'downloadUrl' => route('userAttachment.getFile', ['userAttachment' => $value->id]), // the url to download the file
+                    'url' => route('userAttachment.destroy', ['userAttachment' => $value->id]) // server api to delete the file based on key
                 ));
             }
         }
@@ -211,6 +247,29 @@ class UserAttachmentController extends Controller
         );
         
         return Response::json( $data );   
+    }
+    
+    public function getFile(Request $request, UserAttachment $userAttachment){
+        //$link_url = Storage::url( $userAttachment->link_url );
+        //return Storage::download($userAttachment->link_url, $name = null, $headers = null);
+
+        if(Storage::exists($userAttachment->link_url)){
+            return Storage::download($userAttachment->link_url, $userAttachment->file_original_name);
+        } 
+    }
+    
+    public function showFile(Request $request, $filename){
+        //$path = explode('/', $filename);
+        //$path = storage_path($filename);
+        $filename = str_replace('/', DIRECTORY_SEPARATOR, $filename); 
+        if (!Storage::exists($filename)) {
+            abort(404);
+        }
+        $file = Storage::get($filename);
+        $type = Storage::mimeType($filename);
+        $response = Response::make($file, 200);
+        $response->header("Content-Type", $type);
+        return $response;
     }
     
 }

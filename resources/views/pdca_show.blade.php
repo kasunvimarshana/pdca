@@ -214,7 +214,7 @@
                 async: false,
                 cache: false,
                 processData: false,
-                url: "{!! route('userAttachment.listUserAttachmentFileInput') !!}",
+                url: "{!! route('userAttachment.listUserAttachmentFileInput', array('attachable_type' => get_class($pDCA), 'attachable_id' => $pDCA->id)) !!}",
                 method: "GET",
                 data: {
                     '_token': '{!! csrf_token() !!}'
@@ -254,7 +254,7 @@
                 async: false,
                 cache: false,
                 processData: false,
-                url: "{!! route('userAttachment.listUserAttachmentFileInput') !!}",
+                url: "{!! route('userAttachment.listUserAttachmentFileInput', array('attachable_type' => get_class($pDCA), 'attachable_id' => $pDCA->id)) !!}",
                 method: "GET",
                 data: {
                     '_token': '{!! csrf_token() !!}'
@@ -297,19 +297,36 @@
         
         $("#var_user_attachment").fileinput({
             'theme': "fa",
+            'dropZoneEnabled': false,
+            'dropZoneClickTitle': false,
+            'browseOnZoneClick': false,
+            'dropZoneTitle': "",
             'previewClass': "",
             'uploadAsync': false,
             'previewFileType': 'any',
             'validateInitialCount': true,
             'initialPreviewAsData': true,
             'overwriteInitial': true,
+            'autoReplace': false,
             'append': true,
             'required': false,
+            'showPreview': true,
+            'showUploadedThumbs': false,
+            'showUploadedState': false,
+            'showCancel': false,
+            'showPause': false,
+            'showClose': false,
             'showUpload': false,
             'showRemove': false,
+            'showCaption': false,
+            'showBrowse': false,
             'slugCallback': function(filename){return filename},
-            'uploadUrl': "{!! route('userAttachment.listUserAttachmentFileInput') !!}",
-            'testUrl': "{!! route('userAttachment.listUserAttachmentFileInput') !!}",
+            'uploadUrl': "{!! route('userAttachment.listUserAttachmentFileInput', array('attachable_type' => get_class($pDCA), 'attachable_id' => $pDCA->id)) !!}",
+            'testUrl': "{!! route('userAttachment.listUserAttachmentFileInput', array('attachable_type' => get_class($pDCA), 'attachable_id' => $pDCA->id)) !!}",
+            'encodeUrl': true,
+            'mergeAjaxCallbacks': true,
+            'mergeAjaxDeleteCallbacks': true,
+            'purifyHtml': true,
             'uploadExtraData': function() {
                 return {
                     '_token': '{!! csrf_token() !!}'
@@ -318,45 +335,76 @@
             'initialPreview': getInitialPreview(),
             'initialPreviewConfig': getInitialPreviewConfig(),
             'initialPreviewThumbTags': [],
+            'initialPreviewShowDelete': false,
             layoutTemplates: {
-                main1: "{preview}\n" +
-                    "<div class=\'input-group {class}\'>\n" +
-                    "   <div class=\'input-group-btn\ input-group-prepend'>\n" +
-                    "       {browse}\n" +
-                    "       {upload}\n" +
-                    "       {remove}\n" +
-                    "   </div>\n" +
-                    "   {caption}\n" +
-                    "</div>"
+                main1: '{preview}' + 
+                    '<div class="kv-upload-progress kv-hidden"></div>\n' + 
+                    '<div class="clearfix"></div>\n' + 
+                    '<div class="input-group {class}" style="display: none;">\n' + 
+                    '   {caption}\n' + 
+                    '   <div class="input-group-btn">\n' + 
+                    //'       {remove}\n' + 
+                    '       {cancel}\n' + 
+                    '       {pause}\n' + 
+                    //'       {upload}\n' + 
+                    '       {browse}\n' + 
+                    '   </div>\n' + 
+                    '</div>'
+            },
+            fileActionSettings: {
+                showUpload: false,
+                showDownload: true,
+                showRemove: false,
+                showZoom: true,
+                showDrag: false,
             }
         })
         .on("filebeforedelete", function() {
             return new Promise(function(resolve, reject) {
-                $.confirm({
-                    title: 'Confirmation!',
-                    content: 'Are you sure you want to delete this file?',
-                    type: 'red',
-                    buttons: {   
-                        ok: {
-                            btnClass: 'btn-primary text-white',
-                            keys: ['enter'],
-                            action: function(){
-                                resolve();
+                 bootbox.confirm({
+                        size: "small",
+                        title: "Confirm",
+                        message: "Are You Sure ?",
+                        onEscape: true,
+                        show: true,
+                        scrollable: true,
+                        buttons: {
+                            confirm: {
+                                label: 'Yes',
+                                className: 'btn-success',
+                                callback: function(){}
+                            },
+                            cancel: {
+                                label: 'No',
+                                className: 'btn-danger  btn-primary',
+                                callback: function(){}
                             }
                         },
-                        cancel: function(){
-                            $.alert("File deletion was aborted!");
+                        callback: function (result) {
+                            //console.log('This was logged in the callback: ' + result);
+                            if( result === true ){
+                                resolve();
+                            }
                         }
-                    }
-                });
+                    })
+                        .find('.modal-header').addClass('bg-danger')
+                        /*.find('.bootbox-cancel:first').focus()
+                        .find('.bootbox-cancel').attr('autofocus', true)
+                        .on('shown.bs.modal', function(e){
+                            $(this).find(".bootbox-cancel:first").focus();
+                        })*/
+                        .init(function(e){
+                            $(this).find(".bootbox-cancel").focus();
+                        });
             });
         })
         .on('filedeleted', function() {
             setTimeout(function() {
-                $.alert("File deletion was successful!");
+                console.log("File deletion was successful!");
             }, 900);
-        })
-        .attr("readonly", "readonly");
+        });
+        //.attr("readonly", "readonly")
+        //.attr("disabled", "disabled");
         //.fileinput("disable");
         
         $("#complete_date").datepicker({

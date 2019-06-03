@@ -27,19 +27,7 @@ Route::get('home', array('uses' => function(){
     return view('home');
 }))->name('home.index');
 
-Route::get('storage/{filename}', function($filename){
-    //$path = explode('/', $filename);
-    //$path = storage_path($filename);
-    $filename = str_replace('/', DIRECTORY_SEPARATOR, $filename); 
-    if (!Storage::exists($filename)) {
-        abort(404);
-    }
-    $file = Storage::get($filename);
-    $type = Storage::mimeType($filename);
-    $response = Response::make($file, 200);
-    $response->header("Content-Type", $type);
-    return $response;
-})->where(['filename' => '.*']);
+Route::get('storage/{filename}', array('uses' => 'UserAttachmentController@showFile'))->where(['filename' => '.*']);
 
 Route::group(['middleware' => 'memberMiddleWare'], function(){
     Route::match(['get', 'post'], 'users/list', array('uses' => 'UserController@listUsers'))->name('user.list');
@@ -56,6 +44,9 @@ Route::group(['middleware' => 'memberMiddleWare'], function(){
     Route::get('pdcas/{pDCA}/destroy', array('uses' => 'PDCAController@destroy'))->name('pDCA.destroy');
     Route::get('pdcas/{pDCA}/edit', array('uses' => 'PDCAController@edit'))->name('pDCA.edit');
     Route::post('pdcas/{pDCA}/update', array('uses' => 'PDCAController@update'))->name('pDCA.update');
+    
+    Route::get('user-attachments/{userAttachment}/getFile', array('uses' => 'UserAttachmentController@getFile'))->name('userAttachment.getFile');
+    Route::get('user-attachments/{userAttachment}/destroy', array('uses' => 'UserAttachmentController@destroy'))->name('userAttachment.destroy');
 });
 
 Route::group(['middleware' => 'superAdminMiddleware'], function(){

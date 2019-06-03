@@ -1,0 +1,228 @@
+    <script>
+        function getInitialPreview(){
+            "use strict";
+            
+            var returnData = Array();
+            
+            $.ajax({
+                async: false,
+                cache: false,
+                processData: false,
+                url: "{!! route('userAttachment.listUserAttachmentFileInput') !!}",
+                method: "GET",
+                data: {
+                    '_token': '{!! csrf_token() !!}'
+                },
+                xhrFields: {
+                    withCredentials: true
+                },
+                beforeSend: function( xhr ) {
+                    //xhr.overrideMimeType( "text/plain; charset=x-user-defined" );
+                }
+            })
+            .done(function(data) {
+                //console.log( "success" );
+                //console.log(data);
+                //var dataObj = $.parseJSON( data );
+                var dataObj = data;
+                returnData = dataObj.initialPreview;
+            })
+            .fail(function(data) {
+                //console.log( "error" );
+                //console.log(data);
+            })
+            .always(function(data) {
+                //console.log( "complete" );
+                //console.log(data);
+            });
+            
+            return returnData;
+        }
+        
+        function getInitialPreviewConfig(){
+            "use strict";
+            
+            var returnData = Array();
+            
+            $.ajax({
+                async: false,
+                cache: false,
+                processData: false,
+                url: "{!! route('userAttachment.listUserAttachmentFileInput') !!}",
+                method: "GET",
+                data: {
+                    '_token': '{!! csrf_token() !!}'
+                },
+                xhrFields: {
+                    withCredentials: true
+                },
+                beforeSend: function( xhr ) {
+                    //xhr.overrideMimeType( "text/plain; charset=x-user-defined" );
+                }
+            })
+            .done(function(data) {
+                //console.log( "success" );
+                //console.log(data);
+                //var dataObj = $.parseJSON( data );
+                var dataObj = data;
+                returnData = dataObj.initialPreviewConfig;
+            })
+            .fail(function(data) {
+                //console.log( "error" );
+                //console.log(data);
+            })
+            .always(function(data) {
+                //console.log( "complete" );
+                //console.log(data);
+            });
+            
+            return returnData;
+        }
+    </script>
+    <script>
+    $(function() {
+        "use strict";
+        
+        $("#own_user").select2().prop("disabled", true);
+        $("#company_pk").select2().prop("disabled", true);
+        $("#department_pk").select2().prop("disabled", true);
+        $("#title").prop("disabled", true);
+        $("#description").prop("disabled", true);
+        
+        $("#var_user_attachment").fileinput({
+            'theme': "fa",
+            'dropZoneEnabled': false,
+            'dropZoneClickTitle': false,
+            'browseOnZoneClick': false,
+            'dropZoneTitle': "",
+            'previewClass': "",
+            'uploadAsync': false,
+            'previewFileType': 'any',
+            'validateInitialCount': true,
+            'initialPreviewAsData': true,
+            'overwriteInitial': true,
+            'autoReplace': false,
+            'append': true,
+            'required': false,
+            'showPreview': true,
+            'showUploadedThumbs': false,
+            'showUploadedState': false,
+            'showCancel': false,
+            'showPause': false,
+            'showClose': false,
+            'showUpload': false,
+            'showRemove': false,
+            'showCaption': false,
+            'showBrowse': false,
+            'slugCallback': function(filename){return filename},
+            'uploadUrl': "{!! route('userAttachment.listUserAttachmentFileInput', array()) !!}",
+            'testUrl': "{!! route('userAttachment.listUserAttachmentFileInput', array()) !!}",
+            'encodeUrl': true,
+            'mergeAjaxCallbacks': true,
+            'mergeAjaxDeleteCallbacks': true,
+            'purifyHtml': true,
+            'uploadExtraData': function() {
+                return {
+                    '_token': '{!! csrf_token() !!}'
+                };
+            },
+            'initialPreview': getInitialPreview(),
+            'initialPreviewConfig': getInitialPreviewConfig(),
+            'initialPreviewThumbTags': [],
+            'initialPreviewShowDelete': false,
+            layoutTemplates: {
+                main1: '{preview}' + 
+                    '<div class="kv-upload-progress kv-hidden"></div>\n' + 
+                    '<div class="clearfix"></div>\n' + 
+                    '<div class="input-group {class}" style="display: none;">\n' + 
+                    '   {caption}\n' + 
+                    '   <div class="input-group-btn">\n' + 
+                    //'       {remove}\n' + 
+                    '       {cancel}\n' + 
+                    '       {pause}\n' + 
+                    //'       {upload}\n' + 
+                    '       {browse}\n' + 
+                    '   </div>\n' + 
+                    '</div>'
+            },
+            fileActionSettings: {
+                showUpload: false,
+                showDownload: false,
+                showRemove: false,
+                showZoom: false,
+                showDrag: false,
+            }
+        })
+        .on("filebeforedelete", function() {
+            return new Promise(function(resolve, reject) {
+                 bootbox.confirm({
+                        size: "small",
+                        title: "Confirm",
+                        message: "Are You Sure ?",
+                        onEscape: true,
+                        show: true,
+                        scrollable: true,
+                        buttons: {
+                            confirm: {
+                                label: 'Yes',
+                                className: 'btn-success',
+                                callback: function(){}
+                            },
+                            cancel: {
+                                label: 'No',
+                                className: 'btn-danger  btn-primary',
+                                callback: function(){}
+                            }
+                        },
+                        callback: function (result) {
+                            //console.log('This was logged in the callback: ' + result);
+                            if( result === true ){
+                                resolve();
+                            }
+                        }
+                    })
+                        .find('.modal-header').addClass('bg-danger')
+                        /*.find('.bootbox-cancel:first').focus()
+                        .find('.bootbox-cancel').attr('autofocus', true)
+                        .on('shown.bs.modal', function(e){
+                            $(this).find(".bootbox-cancel:first").focus();
+                        })*/
+                        .init(function(e){
+                            $(this).find(".bootbox-cancel").focus();
+                        });
+            });
+        })
+        .on('filedeleted', function() {
+            setTimeout(function() {
+                console.log("File deletion was successful!");
+            }, 900);
+        });
+        //.attr("readonly", "readonly")
+        //.attr("disabled", "disabled");
+        //.fileinput("disable");
+        
+        $("#complete_date").datepicker({
+            'autoclose': true,
+            'format': "yyyy-mm-dd",
+            'immediateUpdates': true,
+            'todayBtn': true,
+            'todayHighlight': true,
+            // 'widgetParent': ???,
+            'widgetPositioning': {
+                horizontal: "auto",
+                vertical: "auto"
+            },
+            'toggleActive': true,
+            'orientation': 'auto',
+            'container': 'body'
+        })
+        .datepicker("setDate", moment('{!! $pDCA->complete_date !!}', 'YYYY-MM-DD HH:mm:ss').toDate())
+        .trigger("changeDate")
+        .datepicker("destroy")
+        .attr("readonly","readonly");
+        
+        $('#formObject01').submit(function(event) {
+            event.preventDefault();
+        });
+    });
+    </script>

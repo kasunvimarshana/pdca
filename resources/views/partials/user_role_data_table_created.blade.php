@@ -120,11 +120,13 @@ $(function(){
                         buttons: {
                             confirm: {
                                 label: 'Yes',
-                                className: 'btn-success'
+                                className: 'btn-success',
+                                callback: function(){}
                             },
                             cancel: {
                                 label: 'No',
-                                className: 'btn-danger  btn-primary'
+                                className: 'btn-danger  btn-primary',
+                                callback: function(){}
                             }
                         },
                         callback: function (result) {
