@@ -24,7 +24,7 @@ Route::post('login', array('uses' => 'LoginController@doLogin'))->name('login.do
 Route::get('logout', array('uses' => 'LoginController@doLogout'))->name('login.doLogout');
 
 Route::get('home', array('uses' => function(){
-    return view('home');
+    return redirect()->route('company.showDepartments');
 }))->name('home.index');
 
 Route::get('storage/{filename}', array('uses' => 'UserAttachmentController@showFile'))->where(['filename' => '.*']);
