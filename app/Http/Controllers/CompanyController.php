@@ -11,10 +11,17 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\View;
 use DB;
+use Illuminate\Support\Str;
+use App\LDAPModel;
+use LdapQuery\Builder; 
+use Illuminate\Http\JsonResponse;
+use Carbon\Carbon;
+use \StdClass;
 use \Response;
 
 use App\Login;
 use App\User;
+use App\PDCA;
 
 class CompanyController extends Controller
 {
@@ -273,4 +280,60 @@ class CompanyController extends Controller
         
         return Response::json( $data );   
     }
+    
+    public function showDepartments(Request $request){
+        $loginUser = Login::getUserData();
+        $date_today = Carbon::now()->format('Y-m-d');
+        $date_from = Carbon::now()->startOfYear()->format('Y-m-d');
+        $date_to = Carbon::now()->format('Y-m-d');
+        $complete_date_from = $date_from;
+        $complete_date_to = $date_to;
+        
+        $companyObj = new StdClass();
+        $companyObj->company_name = $loginUser->company;
+        $departmentsArray = array();
+        
+        $departmentsArray = DB::table('p_d_c_a_company_departments')
+            ->select('company_pk')
+            ->addSelect('department_pk')
+            ->where('is_visible', true)
+            ->where('company_pk','=',$companyObj->company_name)
+            ->distinct('department_pk')
+            ->get();
+        
+        foreach($departmentsArray as $key=>&$value){
+            
+            $pDCAAllCount = PDCA::where('is_visible','=',true)
+                ->whereDate('complete_date','>=',$complete_date_from)
+                ->whereDate('complete_date','<=',$complete_date_to)
+                ->count();
+
+            $pDCACompanyDepartmentAllCount = PDCA::where('is_visible','=',true)
+                ->whereDate('complete_date','>=',$complete_date_from)
+                ->whereDate('complete_date','<=',$complete_date_to)
+                ->whereHas('pDCACompanyDepartments', function($query) use ($value){
+                    $query->where('company_pk','=',$value->company_pk);
+                    $query->where('department_pk','=',$value->department_pk);
+                    $query->distinct('id');
+                })
+                ->count();
+
+            if( ($pDCAAllCount == 0) || empty($pDCAAllCount) ){
+                $pDCAAllCount = 1;
+            }
+            
+            $value->pDCAAllCount = $pDCAAllCount;
+            $value->pDCACompanyDepartmentAllCount = $pDCACompanyDepartmentAllCount;
+            $value->pDCACompanyDepartmentAllCountPercentage = (($pDCACompanyDepartmentAllCount / $pDCAAllCount) * 100);
+
+        }
+        
+        // get data
+        $companyObj->departments = $departmentsArray;
+        
+        if(view()->exists('company_department_show')){
+            return View::make('company_department_show', ['companyObj' => $companyObj]);
+        }
+    }
+    
 }

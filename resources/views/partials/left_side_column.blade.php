@@ -52,7 +52,7 @@
                     </span>
                 </a>
                 <ul class="treeview-menu">
-                    <li class="{!! set_active(['team/departments/show', 'team/departments/*']) !!}"><a href="{!! route('login.doLogin') !!}"> <i class="fa fa-arrow-circle-o-right"></i> Status</a></li>
+                    <li class="{!! set_active(['team/departments/show', 'team/departments/*']) !!}"><a href="{!! route('department.show') !!}"> <i class="fa fa-arrow-circle-o-right"></i> Status</a></li>
                 </ul>
             </li>
             <li class="treeview {!! set_active(['team/companies', 'team/companies/*']) !!}">
@@ -63,7 +63,7 @@
                     </span>
                 </a>
                 <ul class="treeview-menu">
-                    <li class="{!! set_active(['team/companies/departments', 'team/companies/departments/*']) !!}"><a href="{!! route('login.doLogin') !!}"> <i class="fa fa-arrow-circle-o-right"></i> Status</a></li>
+                    <li class="{!! set_active(['team/companies/departments', 'team/companies/departments/*']) !!}"><a href="{!! route('company.showDepartments') !!}"> <i class="fa fa-arrow-circle-o-right"></i> Status</a></li>
                 </ul>
             </li>
             @superadmin

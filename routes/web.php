@@ -43,10 +43,15 @@ Route::group(['middleware' => 'memberMiddleWare'], function(){
     Route::get('pdcas/{pDCA}/show', array('uses' => 'PDCAController@show'))->name('pDCA.show');
     Route::get('pdcas/{pDCA}/destroy', array('uses' => 'PDCAController@destroy'))->name('pDCA.destroy');
     Route::get('pdcas/{pDCA}/edit', array('uses' => 'PDCAController@edit'))->name('pDCA.edit');
-    Route::post('pdcas/{pDCA}/update', array('uses' => 'PDCAController@update'))->name('pDCA.update');
+    Route::post('pdcas/{pDCA}/edit', array('uses' => 'PDCAController@update'))->name('pDCA.update');
     
     Route::get('user-attachments/{userAttachment}/getFile', array('uses' => 'UserAttachmentController@getFile'))->name('userAttachment.getFile');
-    Route::get('user-attachments/{userAttachment}/destroy', array('uses' => 'UserAttachmentController@destroy'))->name('userAttachment.destroy');
+    Route::post('user-attachments/{userAttachment}/destroy', array('uses' => 'UserAttachmentController@destroy'))->name('userAttachment.destroy');
+    Route::get('pdca-users/{pDCAUser}/destroy', array('uses' => 'PDCAUserController@destroy'))->name('pDCAUser.destroy');
+    
+    Route::get('team/companies/departments/show', array('uses' => 'CompanyController@showDepartments'))->name('company.showDepartments');
+    Route::get('team/departments/show', array('uses' => 'DepartmentController@showDepartments'))->name('department.show');
+    Route::get('team/companies/{company}/{department}/pdcas/show', array('uses' => 'DepartmentController@showDepartmentPDCA'))->name('department.showDepartmentPDCA');
 });
 
 Route::group(['middleware' => 'superAdminMiddleware'], function(){

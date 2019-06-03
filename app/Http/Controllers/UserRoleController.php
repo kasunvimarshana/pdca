@@ -133,6 +133,7 @@ class UserRoleController extends Controller
     public function destroy(UserRole $userRole)
     {
         //
+        $userRoleClone = clone $pDCA;
         $data = array('title' => '', 'text' => '', 'type' => '', 'timer' => 3000);
         //Model::find(explode(',', $id))->delete();
         // do process
@@ -141,7 +142,7 @@ class UserRoleController extends Controller
 
         try {
             
-            $userRole->delete();
+            $userRoleClone->delete();
             
         }catch(\Exception $e){
             DB::rollback();

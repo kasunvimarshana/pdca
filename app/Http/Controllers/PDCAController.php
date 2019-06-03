@@ -15,6 +15,7 @@ use DB;
 use \Response;
 use Storage;
 use Carbon\Carbon;
+use Chumper\Zipper\Zipper;
 
 use App\Login;
 use App\User;
@@ -138,16 +139,16 @@ class PDCAController extends Controller
                 ));
                 
                 foreach($pDCAUserData as $key => $value){
-                    $tempPDCAUser = new User();
-                    $tempPDCAUser->mail = $value;
-                    $tempPDCAUser = $tempPDCAUser->getUser();
+                    $tempUser = new User();
+                    $tempUser->mail = $value;
+                    $tempUser = $tempUser->getUser();
                     
                     $newPDCAUser = PDCAUser::create(array(
                         'is_visible' => true,
                         'p_d_c_a_id' => $newPDCA->id,
-                        'own_user' => $tempPDCAUser->mail,
-                        'company_name' => $tempPDCAUser->company,
-                        'department_name' => $tempPDCAUser->department
+                        'own_user' => $tempUser->mail,
+                        'company_name' => $tempUser->company,
+                        'department_name' => $tempUser->department
                     ));
                 }
                 
@@ -246,6 +247,172 @@ class PDCAController extends Controller
     public function update(Request $request, PDCA $pDCA)
     {
         //
+        $pDCAClone = clone $pDCA;
+        $data = array('title' => '', 'text' => '', 'type' => '', 'timer' => 3000);
+        /*DB::transaction(function () {
+            DB::table('table_1')->update(['column' => 1]);
+            DB::table('table_2')->delete();
+        });*/
+        // validate the info, create rules for the inputs
+        $rules = array(
+            'title'    => 'required',
+            'company_pk'    => 'required',
+            'department_pk'    => 'required'
+        );
+        // run the validation rules on the inputs from the form
+        $validator = Validator::make(Input::all(), $rules);
+        // if the validator fails, redirect back to the form
+        if ($validator->fails()) {
+            
+            $data = array(
+                'title' => 'error',
+                'text' => 'error',
+                'type' => 'warning',
+                'timer' => 3000
+            );
+
+            //return Response::json( $data );
+            return redirect()->back()->withInput();
+            
+        } else {
+            // do process
+            $loginUserObj = Login::getUserData();
+            $current_user = $loginUserObj->mail;
+            $company_name = $loginUserObj->company;
+            $department_name = $loginUserObj->department;
+            //$pDCAResourceDir = PDCAMetaEnum::RESOURCE_DIR .'/'. uniqid( time() ) . '_';
+            $pDCAResourceDir = $pDCAClone->resource_dir;
+            if( (!isset($pDCAResourceDir)) || (empty($pDCAResourceDir)) ){
+                $pDCAResourceDir = PDCAMetaEnum::RESOURCE_DIR .'/'. uniqid( time() ) . '_';
+            }
+            
+            $pDCAData = array(	
+                //'is_visible' => true,
+                //'created_user' => $current_user,
+                //'company_name' => $company_name,
+                //'department_name' => $department_name,
+                'title' => Input::get('title'),
+                'description' => Input::get('description'),
+                'p_d_c_a_category_id' => Input::get('p_d_c_a_category_id'),
+                'status_id' => PDCAStatusEnum::DEFAULT,
+                'start_date' => Input::get('start_date'),
+                'complete_date' => Input::get('complete_date'),
+                'piority' => Input::get('piority'),
+                'resource_dir' => $pDCAResourceDir
+            );
+            
+            $pDCAUserData = (array) Input::get('own_user');
+            $userAttachmentData = (array) $request->file('var_user_attachment');
+            $company_pkData = Input::get('company_pk');
+            $department_pkData = Input::get('department_pk');
+            
+            // Start transaction!
+            DB::beginTransaction();
+
+            try {
+                //create directory
+                if(!Storage::exists($pDCAResourceDir)) {
+                    Storage::makeDirectory($pDCAResourceDir, 0775, true); //creates directory
+                }
+                // Validate, then create if valid
+                $pDCAClone->update( $pDCAData );
+                
+                $pDCAInfo = new PDCAInfo();
+                $pDCAInfo->firstOrCreate(array(
+                    'is_visible' => true,
+                    'p_d_c_a_id' => $pDCAClone->id,
+                    'description' => $pDCAClone->description,
+                    'created_user' => $pDCAClone->created_user
+                ));
+                
+                $pdcaCompanyDepartment = new PDCACompanyDepartment();
+                $pdcaCompanyDepartment->firstOrCreate(array(
+                    'is_visible' => true,
+                    'p_d_c_a_id' => $pDCAClone->id,
+                    'company_pk' => $company_pkData,
+                    'department_pk' => $department_pkData
+                ));
+                
+                foreach($pDCAUserData as $key => $value){
+                    $tempUser = new User();
+                    $tempUser->mail = $value;
+                    $tempUser = $tempUser->getUser();
+                    $tempPDCAUser = new PDCAUser();
+                    
+                    $savedPDCAUser = $tempPDCAUser->firstOrCreate(array(
+                        'is_visible' => true,
+                        'p_d_c_a_id' => $pDCAClone->id,
+                        'own_user' => $tempUser->mail,
+                        'company_name' => $tempUser->company,
+                        'department_name' => $tempUser->department
+                    ));
+                }
+                
+                if( $request->hasFile('var_user_attachment') ){
+                    foreach($userAttachmentData as $key => $value){
+                        $file_original_name = $value->getClientOriginalName();
+                        $file_type = $value->getClientOriginalExtension();
+                        //$filename = $value->store( $pDCAResourceDir );
+                        $filename = $value->storeAs( 
+                            $pDCAResourceDir,
+                            $pDCAClone->id . '_' . uniqid( time() ) . '_' . $file_original_name
+                        );
+                        $newUserAttachment = $pDCAClone->userAttachments()->create(array(
+                            'is_visible' => true,
+                            'attached_by' => $current_user,
+                            'file_original_name' => $file_original_name,
+                            //'attachable_type' => get_class( $object ),
+                            //'attachable_id' => $object->id,
+                            'file_type' => $file_type,
+                            'link_url' => $filename
+                        ));
+                    }
+                }
+                
+            }catch(\Exception $e){
+                
+                DB::rollback();
+                
+                //delete directory
+                /*if(Storage::exists($pDCAResourceDir)) {
+                    Storage::deleteDirectory($pDCAResourceDir);
+                }*/
+                
+                $data = array(
+                    'title' => 'error',
+                    'text' => 'error',
+                    'type' => 'warning',
+                    'timer' => 3000
+                );dd($e);
+
+                //return Response::json( $data ); 
+                return redirect()->back()->withInput();
+                
+            }
+
+            // If we reach here, then
+            // data is valid and working.
+            // Commit the queries!
+            DB::commit();
+        }
+        
+        $data = array(
+            'title' => 'success',
+            'text' => 'success',
+            'type' => 'success',
+            'timer' => 3000
+        );
+        
+        //return Response::json( $data );
+        notify()->flash(
+            $data['title'], 
+            $data['type'], [
+            'timer' => $data['timer'],
+            'text' => $data['text'],
+        ]);
+        
+        return redirect()->back()->withInput();
+        //return redirect()->route('pDCA.showCreatedPDCA');
     }
 
     /**
@@ -257,6 +424,48 @@ class PDCAController extends Controller
     public function destroy(PDCA $pDCA)
     {
         //
+        $pDCAClone = clone $pDCA;
+        $data = array('title' => '', 'text' => '', 'type' => '', 'timer' => 3000);
+        //Model::find(explode(',', $id))->delete();
+        // do process
+        // Start transaction!
+        DB::beginTransaction();
+
+        try {
+            
+            //delete directory
+            if(Storage::exists($pDCAClone->resource_dir)) {
+                Storage::deleteDirectory($pDCAClone->resource_dir);
+            }
+            
+            $pDCAClone->userAttachments()->delete();
+            $pDCAClone->pDCACompanyDepartments()->delete();
+            $pDCAClone->pDCAUsers()->delete();
+            $pDCAClone->delete();
+            
+        }catch(\Exception $e){
+            DB::rollback();
+            
+            $data = array(
+                'title' => 'error',
+                'text' => 'error',
+                'type' => 'warning',
+                'timer' => 3000
+            );
+
+            return Response::json( $data );
+        }
+
+        DB::commit();
+
+        $data = array(
+            'title' => 'success',
+            'text' => 'success',
+            'type' => 'success',
+            'timer' => 3000
+        );
+
+        return Response::json( $data );
     }
     
     //
@@ -382,5 +591,32 @@ class PDCAController extends Controller
         if(view()->exists('pdca_created_show_all')){
             return View::make('pdca_created_show_all');
         }
+    }
+    
+    public function getFile(Request $request, PDCA $pDCA){
+        $userAttachments = $pDCA->userAttachments;
+        if( $userAttachments ){
+            $pDCAResourceDir = PDCAMetaEnum::RESOURCE_DIR . '/' . 'tep_files';
+            if(!Storage::exists($pDCAResourceDir)) {
+                Storage::makeDirectory($pDCAResourceDir, 0775, true); //creates directory
+            }
+            $zipperName = $pDCAResourceDir . '/attachments.zip';
+            
+            $zipper = new Zipper();
+            $zipper->make(Storage::path($zipperName))->folder('attachments');
+            foreach($userAttachments as $userAttachment){
+                if(Storage::exists( $userAttachment->link_url )) {
+                    $zipper->add( Storage::path( $userAttachment->link_url ) );
+                }
+            }
+            $zipper->close();
+            
+            if(Storage::exists($zipperName)) {
+                //return response()->download( Storage::url( $zipperName ) );
+                return Storage::download( $zipperName );
+            }else{
+                return redirect()->back();
+            }
+        } 
     }
 }
