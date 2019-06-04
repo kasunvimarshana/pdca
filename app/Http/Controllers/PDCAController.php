@@ -100,11 +100,11 @@ class PDCAController extends Controller
                 'department_name' => $department_name,
                 'title' => urldecode(Input::get('title')),
                 'description' => urldecode(Input::get('description')),
-                'p_d_c_a_category_id' => urldecode(Input::get('p_d_c_a_category_id')),
+                'p_d_c_a_category_id' => Input::get('p_d_c_a_category_id'),
                 'status_id' => PDCAStatusEnum::DEFAULT,
-                'start_date' => urldecode(Input::get('start_date')),
-                'complete_date' => urldecode(Input::get('complete_date')),
-                'piority' => urldecode(Input::get('piority')),
+                'start_date' => Input::get('start_date'),
+                'complete_date' => Input::get('complete_date'),
+                'piority' => Input::get('piority'),
                 'resource_dir' => $pDCAResourceDir
             );
             
@@ -293,11 +293,11 @@ class PDCAController extends Controller
                 //'department_name' => $department_name,
                 'title' => urldecode(Input::get('title')),
                 'description' => urldecode(Input::get('description')),
-                'p_d_c_a_category_id' => urldecode(Input::get('p_d_c_a_category_id')),
+                'p_d_c_a_category_id' => Input::get('p_d_c_a_category_id'),
                 'status_id' => PDCAStatusEnum::DEFAULT,
-                'start_date' => urldecode(Input::get('start_date')),
-                'complete_date' => urldecode(Input::get('complete_date')),
-                'piority' => urldecode(Input::get('piority')),
+                'start_date' => Input::get('start_date'),
+                'complete_date' => Input::get('complete_date'),
+                'piority' => Input::get('piority'),
                 'resource_dir' => $pDCAResourceDir
             );
             
@@ -383,7 +383,7 @@ class PDCAController extends Controller
                     'text' => 'error',
                     'type' => 'warning',
                     'timer' => 3000
-                );dd($e);
+                );
 
                 //return Response::json( $data ); 
                 return redirect()->back()->withInput();
@@ -547,6 +547,18 @@ class PDCAController extends Controller
         if( ($request->get('title')) && (!empty($request->get('title'))) ){
             $title =  urldecode($request->get('title'));
             $query = $query->where('title', 'like', '%' . $title . '%');
+        }
+        
+        // start date
+        if( ($request->get('start_date')) && (!empty($request->get('start_date'))) ){
+            $start_date =  $request->get('start_date');
+            $query = $query->whereDate('start_date', 'like', $start_date . '%');
+        }
+        
+        // complete date
+        if( ($request->get('complete_date')) && (!empty($request->get('complete_date'))) ){
+            $complete_date =  $request->get('complete_date');
+            $query = $query->whereDate('complete_date', 'like', $complete_date . '%');
         }
         
         // get filtered record count
