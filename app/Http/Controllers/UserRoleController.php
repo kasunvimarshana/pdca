@@ -52,7 +52,7 @@ class UserRoleController extends Controller
 
         $userRoleData = array(	
             'is_visible' => true,
-            'user_pk' => Input::get('user_pk'),
+            'user_pk' => urldecode(Input::get('user_pk')),
             'role_pk' => 'super-admin',
         );
 
@@ -133,7 +133,7 @@ class UserRoleController extends Controller
     public function destroy(UserRole $userRole)
     {
         //
-        $userRoleClone = clone $pDCA;
+        $userRoleClone = clone $userRole;
         $data = array('title' => '', 'text' => '', 'type' => '', 'timer' => 3000);
         //Model::find(explode(',', $id))->delete();
         // do process
@@ -207,13 +207,13 @@ class UserRoleController extends Controller
         
         // role_pk
         if( ($request->get('role_pk')) && (!empty($request->get('role_pk'))) ){
-            $role_pk =  $request->get('role_pk');
+            $role_pk =  urldecode($request->get('role_pk'));
             $query = $query->whereDate('role_pk', '=', $role_pk);
         }
         
         // user_pk
         if( ($request->get('user_pk')) && (!empty($request->get('user_pk'))) ){
-            $user_pk =  $request->get('user_pk');
+            $user_pk =  urldecode($request->get('user_pk'));
             $query = $query->whereDate('user_pk', '=', $user_pk);
         }
         

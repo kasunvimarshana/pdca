@@ -63,7 +63,7 @@ class DepartmentController extends Controller
 
         $departmentData = array(	
             'is_visible' => true,
-            'name' => Input::get('name')
+            'name' => urldecode(Input::get('name'))
         );
 
         // Start transaction!
@@ -141,7 +141,7 @@ class DepartmentController extends Controller
         $current_user = Login::getUserData()->mail;
 
         $departmentData = array(
-            'name' => Input::get('name')
+            'name' => urldecode(Input::get('name'))
         );
 
         // Start transaction!

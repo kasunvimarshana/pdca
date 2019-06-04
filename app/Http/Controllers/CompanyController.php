@@ -63,7 +63,7 @@ class CompanyController extends Controller
 
         $companyData = array(	
             'is_visible' => true,
-            'name' => Input::get('name')
+            'name' => urldecode(Input::get('name'))
         );
 
         // Start transaction!
@@ -141,7 +141,7 @@ class CompanyController extends Controller
         $current_user = Login::getUserData()->mail;
 
         $companyData = array(
-            'name' => Input::get('name')
+            'name' => urldecode(Input::get('name'))
         );
 
         // Start transaction!

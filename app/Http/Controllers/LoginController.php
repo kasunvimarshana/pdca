@@ -49,11 +49,11 @@ class LoginController extends Controller
             ->withInput(Input::except('password'));
         }else{
             $suffix = '@brandix.com';
-            $email = Input::get('email');
+            $email = urldecode(Input::get('email'));
             if( (!@stripos($email, $suffix)) ){
                 $email = $email . $suffix;
             }
-            $password = Input::get('password');
+            $password = urldecode(Input::get('password'));
             // attempt to do the login
             Login::doLogin($email, $password);
             if( Login::isLogin() ){

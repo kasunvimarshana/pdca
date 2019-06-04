@@ -61,25 +61,25 @@ class UserController extends Controller
         
         // employeenumber
         if( ($request->get('employeenumber')) && (!empty($request->get('employeenumber'))) ){
-            $employeenumber = $request->get('employeenumber');
+            $employeenumber = urldecode($request->get('employeenumber'));
             $query = $query->whereRaw('employeenumber', '=', $employeenumber);
         }
         
         // cn
         if( ($request->get('cn')) && (!empty($request->get('cn'))) ){
-            $cn =  $request->get('cn');
+            $cn =  urldecode($request->get('cn'));
             $query = $query->whereRaw('cn', '=', '*' . $cn . '*');
         }
         
         // department
         if( ($request->get('department')) && (!empty($request->get('department'))) ){
-            $department = $request->get('department');
+            $department = urldecode($request->get('department'));
             $query = $query->whereRaw('department', '=', $department);
         }
         
         // mobile
         if( ($request->get('mobile')) && (!empty($request->get('mobile'))) ){
-            $mobile = $request->get('mobile');
+            $mobile = urldecode($request->get('mobile'));
             $query = $query->whereRaw('mobile', '=', $mobile);
         }
         

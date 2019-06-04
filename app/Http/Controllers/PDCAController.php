@@ -98,20 +98,20 @@ class PDCAController extends Controller
                 'created_user' => $current_user,
                 'company_name' => $company_name,
                 'department_name' => $department_name,
-                'title' => Input::get('title'),
-                'description' => Input::get('description'),
-                'p_d_c_a_category_id' => Input::get('p_d_c_a_category_id'),
+                'title' => urldecode(Input::get('title')),
+                'description' => urldecode(Input::get('description')),
+                'p_d_c_a_category_id' => urldecode(Input::get('p_d_c_a_category_id')),
                 'status_id' => PDCAStatusEnum::DEFAULT,
-                'start_date' => Input::get('start_date'),
-                'complete_date' => Input::get('complete_date'),
-                'piority' => Input::get('piority'),
+                'start_date' => urldecode(Input::get('start_date')),
+                'complete_date' => urldecode(Input::get('complete_date')),
+                'piority' => urldecode(Input::get('piority')),
                 'resource_dir' => $pDCAResourceDir
             );
             
             $pDCAUserData = (array) Input::get('own_user');
             $userAttachmentData = (array) $request->file('var_user_attachment');
-            $company_pkData = Input::get('company_pk');
-            $department_pkData = Input::get('department_pk');
+            $company_pkData = urldecode(Input::get('company_pk'));
+            $department_pkData = urldecode(Input::get('department_pk'));
             
             // Start transaction!
             DB::beginTransaction();
@@ -291,20 +291,20 @@ class PDCAController extends Controller
                 //'created_user' => $current_user,
                 //'company_name' => $company_name,
                 //'department_name' => $department_name,
-                'title' => Input::get('title'),
-                'description' => Input::get('description'),
-                'p_d_c_a_category_id' => Input::get('p_d_c_a_category_id'),
+                'title' => urldecode(Input::get('title')),
+                'description' => urldecode(Input::get('description')),
+                'p_d_c_a_category_id' => urldecode(Input::get('p_d_c_a_category_id')),
                 'status_id' => PDCAStatusEnum::DEFAULT,
-                'start_date' => Input::get('start_date'),
-                'complete_date' => Input::get('complete_date'),
-                'piority' => Input::get('piority'),
+                'start_date' => urldecode(Input::get('start_date')),
+                'complete_date' => urldecode(Input::get('complete_date')),
+                'piority' => urldecode(Input::get('piority')),
                 'resource_dir' => $pDCAResourceDir
             );
             
             $pDCAUserData = (array) Input::get('own_user');
             $userAttachmentData = (array) $request->file('var_user_attachment');
-            $company_pkData = Input::get('company_pk');
-            $department_pkData = Input::get('department_pk');
+            $company_pkData = urldecode(Input::get('company_pk'));
+            $department_pkData = urldecode(Input::get('department_pk'));
             
             // Start transaction!
             DB::beginTransaction();
@@ -507,7 +507,7 @@ class PDCAController extends Controller
         
         // own user
         if( ($request->get('own_user')) && (!empty($request->get('own_user'))) ){
-            $own_user =  $request->get('own_user');
+            $own_user =  urldecode($request->get('own_user'));
             $query = $query->whereHas('pDCAUsers', function($query) use ($own_user){
                 $query->where('own_user', '=', $own_user);
             });
@@ -515,7 +515,7 @@ class PDCAController extends Controller
         
         // company
         if( ($request->get('company_pk')) && (!empty($request->get('company_pk'))) ){
-            $company_pk =  $request->get('company_pk');
+            $company_pk =  urldecode($request->get('company_pk'));
             $query = $query->whereHas('pDCACompanyDepartments', function($query) use ($company_pk){
                 $query->where('company_pk', '=', $company_pk);
             });
@@ -523,7 +523,7 @@ class PDCAController extends Controller
         
         // department
         if( ($request->get('department_pk')) && (!empty($request->get('department_pk'))) ){
-            $department_pk =  $request->get('department_pk');
+            $department_pk =  urldecode($request->get('department_pk'));
             $query = $query->whereHas('pDCACompanyDepartments', function($query) use ($department_pk){
                 $query->where('department_pk', '=', $department_pk);
             });
@@ -531,10 +531,22 @@ class PDCAController extends Controller
         
         // category
         if( ($request->get('p_d_c_a_category_name')) && (!empty($request->get('p_d_c_a_category_name'))) ){
-            $p_d_c_a_category_name =  $request->get('p_d_c_a_category_name');
+            $p_d_c_a_category_name =  urldecode($request->get('p_d_c_a_category_name'));
             $query = $query->whereHas('pDCACategory', function($query) use ($p_d_c_a_category_name){
                 $query->where('name', '=', $p_d_c_a_category_name);
             });
+        }
+        
+        // description
+        if( ($request->get('description')) && (!empty($request->get('description'))) ){
+            $description =  urldecode($request->get('description'));
+            $query = $query->where('description', 'like', '%' . $description . '%');
+        }
+        
+        // title
+        if( ($request->get('title')) && (!empty($request->get('title'))) ){
+            $title =  urldecode($request->get('title'));
+            $query = $query->where('title', 'like', '%' . $title . '%');
         }
         
         // get filtered record count

@@ -248,10 +248,10 @@
                tableObj.data('own_user', own_user_val);
             }
             if( company_pk_val || true){
-               tableObj.data('company_pk', {!! $departmentObj !!});
+               tableObj.data('company_pk', '{!! $departmentObj !!}');
             }
             if( department_pk_val || true){
-               tableObj.data('department_pk', {!! $companyObj !!});
+               tableObj.data('department_pk', '{!! $companyObj !!}');
             }
             if( title_val ){
                tableObj.data('title', title_val);
