@@ -20,6 +20,7 @@ class CreateCompanyDepartmentsTable extends Migration
             $table->boolean('is_visible')->default(1)->nullable();
             $table->string('company_pk')->index()->nullable();
             $table->string('department_pk')->index()->nullable();
+            $table->string('colour')->index()->nullable();
             //$table->softDeletes();
             
             $table->foreign('company_pk')->references('name')->on('companies')->onUpdate('cascade');

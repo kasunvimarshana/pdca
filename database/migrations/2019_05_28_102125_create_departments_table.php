@@ -19,6 +19,7 @@ class CreateDepartmentsTable extends Migration
             
             $table->boolean('is_visible')->default(1)->nullable();
             $table->string('name')->index()->unique();
+            $table->string('colour')->index()->nullable();
             //$table->softDeletes();
             
             //$table->dropPrimary('id');

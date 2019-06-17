@@ -30,6 +30,7 @@ class CreatePDCASTable extends Migration
             $table->dateTime('complete_date')->useCurrent()->nullable();
             $table->integer('piority')->default(0)->nullable();
             $table->text('resource_dir')->nullable()->default(null);
+            $table->string('colour')->index()->nullable();
             //$table->softDeletes();
             
             $table->foreign('p_d_c_a_category_id')->references('id')->on('p_d_c_a_categories')->onUpdate('cascade');
