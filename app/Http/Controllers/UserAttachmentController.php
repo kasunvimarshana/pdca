@@ -102,6 +102,7 @@ class UserAttachmentController extends Controller
         try {
             
             if(Storage::exists($userAttachment->link_url)){
+                chmod(Storage::path($userAttachment->link_url), 755);
                 Storage::delete( $userAttachment->link_url );
             }
             $userAttachment->delete();

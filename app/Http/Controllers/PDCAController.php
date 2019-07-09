@@ -435,6 +435,7 @@ class PDCAController extends Controller
             
             //delete directory
             if(Storage::exists($pDCAClone->resource_dir)) {
+                chmod(Storage::path($pDCAClone->resource_dir), 755);
                 Storage::deleteDirectory($pDCAClone->resource_dir);
             }
             
